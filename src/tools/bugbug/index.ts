@@ -1,4 +1,5 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { BugBugApiClient } from '../../utils/bugbugClient.js';
 import { registerBugBugConfigTools } from './config.js';
 import { registerBugBugProfileTools } from './profiles.js';
 import { registerBugBugSuiteTools } from './suites.js';
@@ -6,11 +7,11 @@ import { registerBugBugSuiteRunTools } from './suiteRuns.js';
 import { registerBugBugTestTools } from './tests.js';
 import { registerBugBugTestRunTools } from './testRuns.js';
 
-export function registerBugBugTools(server: McpServer): void {
-  registerBugBugConfigTools(server);
-  registerBugBugProfileTools(server);
-  registerBugBugSuiteTools(server);
-  registerBugBugSuiteRunTools(server);
-  registerBugBugTestTools(server);
-  registerBugBugTestRunTools(server);
+export function registerBugBugTools(server: McpServer, bugbugClient: BugBugApiClient): void {
+  registerBugBugConfigTools(server, bugbugClient);
+  registerBugBugProfileTools(server, bugbugClient);
+  registerBugBugSuiteTools(server, bugbugClient);
+  registerBugBugSuiteRunTools(server, bugbugClient);
+  registerBugBugTestTools(server, bugbugClient);
+  registerBugBugTestRunTools(server, bugbugClient);
 }

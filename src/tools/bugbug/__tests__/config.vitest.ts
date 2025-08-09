@@ -1,44 +1,38 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerBugBugConfigTools } from '../config.js';
-import { BugBugApiClient } from '../../../utils/bugbugClient.js';
-
-// Mock the BugBugApiClient
-vi.mock('../../../utils/bugbugClient.js', () => ({
-  BugBugApiClient: vi.fn(),
-}));
+import type { BugBugApiClient } from '../../../utils/bugbugClient.js';
 
 describe('BugBug Config Tools', () => {
   let mockServer: McpServer;
   let toolHandler: any;
-  let mockClient: any;
+  let mockClient: BugBugApiClient;
 
   beforeEach(() => {
     vi.clearAllMocks();
     
     // Arrange - Create mock client
+    const mockGetIpAddresses = vi.fn();
     mockClient = {
-      getIpAddresses: vi.fn(),
-    };
-    
-    vi.mocked(BugBugApiClient).mockImplementation(() => mockClient);
+      getIpAddresses: mockGetIpAddresses,
+    } as any;
     
     // Arrange - Create mock server
     mockServer = {
       tool: vi.fn((name, description, schema, handler) => {
-        if (name === 'bugbug_get_ip_addresses') {
+        if (name === 'get_ip_addresses') {
           toolHandler = handler;
         }
       }),
     } as any;
 
-    registerBugBugConfigTools(mockServer);
+    registerBugBugConfigTools(mockServer, mockClient);
   });
 
-  it('should register bugbug_get_ip_addresses tool with correct parameters', () => {
+  it('should register get_ip_addresses tool with correct parameters', () => {
     // Assert
     expect(mockServer.tool).toHaveBeenCalledWith(
-      'bugbug_get_ip_addresses',
+      'get_ip_addresses',
       'Get list of BugBug infrastructure IP addresses',
       expect.any(Object),
       expect.any(Function)
@@ -48,16 +42,16 @@ describe('BugBug Config Tools', () => {
   it('should successfully fetch IP addresses', async () => {
     // Arrange
     const mockIpAddresses = ['192.168.1.1', '10.0.0.1', '172.16.0.1'];
-    mockClient.getIpAddresses.mockResolvedValue({
+    vi.mocked(mockClient.getIpAddresses).mockResolvedValue({
       status: 200,
+      statusText: 'OK',
       data: mockIpAddresses,
     });
 
     // Act
-    const result = await toolHandler({ apiToken: 'test-token' });
+    const result = await toolHandler({});
 
     // Assert
-    expect(BugBugApiClient).toHaveBeenCalledWith({ apiToken: 'test-token' });
     expect(mockClient.getIpAddresses).toHaveBeenCalled();
     expect(result.content[0].text).toContain('BugBug Infrastructure IP Addresses');
     expect(result.content[0].text).toContain('192.168.1.1');
@@ -67,13 +61,14 @@ describe('BugBug Config Tools', () => {
 
   it('should handle API errors gracefully', async () => {
     // Arrange
-    mockClient.getIpAddresses.mockResolvedValue({
+    vi.mocked(mockClient.getIpAddresses).mockResolvedValue({
       status: 401,
       statusText: 'Unauthorized',
+      data: [],
     });
 
     // Act
-    const result = await toolHandler({ apiToken: 'invalid-token' });
+    const result = await toolHandler({});
 
     // Assert
     expect(result.content[0].text).toBe('Error: 401 Unauthorized');
@@ -81,13 +76,24 @@ describe('BugBug Config Tools', () => {
 
   it('should handle network errors gracefully', async () => {
     // Arrange
-    mockClient.getIpAddresses.mockRejectedValue(new Error('Network error'));
+    vi.mocked(mockClient.getIpAddresses).mockRejectedValue(new Error('Network error'));
 
     // Act
-    const result = await toolHandler({ apiToken: 'test-token' });
+    const result = await toolHandler({});
 
     // Assert
     expect(result.content[0].text).toContain('Error fetching IP addresses');
     expect(result.content[0].text).toContain('Network error');
+  });
+
+  it('should handle missing API_KEY environment variable', async () => {
+    // Arrange
+    delete process.env.API_KEY;
+
+    // Act
+    const result = await toolHandler({});
+
+    // Assert
+    expect(result.content[0].text).toBe('Error: API_KEY environment variable is not set');
   });
 });

@@ -1,20 +1,18 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { BugBugApiClient } from '../../utils/bugbugClient.js';
+import type { BugBugApiClient } from '../../utils/bugbugClient.js';
 
-export function registerBugBugProfileTools(server: McpServer): void {
+export function registerBugBugProfileTools(server: McpServer, bugbugClient: BugBugApiClient): void {
   server.tool(
-    'bugbug_get_profiles',
+    'get_profiles',
     'Get list of BugBug run profiles',
     {
-      apiToken: z.string().describe('BugBug API token'),
       page: z.number().optional().describe('Page number for pagination'),
       pageSize: z.number().optional().describe('Number of results per page'),
     },
-    async ({ apiToken, page, pageSize }) => {
+    async ({ page, pageSize }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
-        const response = await client.getProfiles(page, pageSize);
+        const response = await bugbugClient.getProfiles(page, pageSize);
         
         if (response.status !== 200) {
           return {
@@ -60,16 +58,14 @@ export function registerBugBugProfileTools(server: McpServer): void {
   );
 
   server.tool(
-    'bugbug_get_profile',
+    'get_profile',
     'Get details of a specific BugBug run profile',
     {
-      apiToken: z.string().describe('BugBug API token'),
       profileId: z.string().describe('Profile UUID'),
     },
-    async ({ apiToken, profileId }) => {
+    async ({ profileId }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
-        const response = await client.getProfile(profileId);
+        const response = await bugbugClient.getProfile(profileId);
         
         if (response.status !== 200) {
           return {

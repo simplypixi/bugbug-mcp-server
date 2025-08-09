@@ -1,22 +1,20 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { BugBugApiClient } from '../../utils/bugbugClient.js';
+import type { BugBugApiClient } from '../../utils/bugbugClient.js';
 
-export function registerBugBugSuiteTools(server: McpServer): void {
+export function registerBugBugSuiteTools(server: McpServer, bugbugClient: BugBugApiClient): void {
   server.tool(
-    'bugbug_get_suites',
+    'get_suites',
     'Get list of BugBug test suites',
     {
-      apiToken: z.string().describe('BugBug API token'),
       page: z.number().optional().describe('Page number for pagination'),
       pageSize: z.number().optional().describe('Number of results per page'),
       query: z.string().optional().describe('Search query for suite names'),
       ordering: z.enum(['name', '-name', 'created', '-created']).optional().describe('Sort order'),
     },
-    async ({ apiToken, page, pageSize, query, ordering }) => {
+    async ({ page, pageSize, query, ordering }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
-        const response = await client.getSuites(page, pageSize, query, ordering);
+        const response = await bugbugClient.getSuites(page, pageSize, query, ordering);
         
         if (response.status !== 200) {
           return {
@@ -62,16 +60,14 @@ export function registerBugBugSuiteTools(server: McpServer): void {
   );
 
   server.tool(
-    'bugbug_get_suite',
+    'get_suite',
     'Get details of a specific BugBug test suite',
     {
-      apiToken: z.string().describe('BugBug API token'),
       suiteId: z.string().describe('Suite UUID'),
     },
-    async ({ apiToken, suiteId }) => {
+    async ({ suiteId }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
-        const response = await client.getSuite(suiteId);
+        const response = await bugbugClient.getSuite(suiteId);
         
         if (response.status !== 200) {
           return {

@@ -1,23 +1,23 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { BugBugApiClient } from '../../utils/bugbugClient.js';
+import type { BugBugApiClient } from '../../utils/bugbugClient.js';
 
-export function registerBugBugTestRunTools(server: McpServer): void {
+export function registerBugBugTestRunTools(server: McpServer, bugbugClient: BugBugApiClient): void {
   server.tool(
-    'bugbug_get_test_runs',
+    'get_test_runs',
     'Get list of historical BugBug test runs',
     {
-      apiToken: z.string().describe('BugBug API token'),
+      
       page: z.number().optional().describe('Page number for pagination'),
       pageSize: z.number().optional().describe('Number of results per page'),
       ordering: z.enum(['-started', 'started']).optional().describe('Sort order by start time'),
       startedAfter: z.string().optional().describe('Filter runs started after this datetime (ISO format)'),
       startedBefore: z.string().optional().describe('Filter runs started before this datetime (ISO format)'),
     },
-    async ({ apiToken, page, pageSize, ordering, startedAfter, startedBefore }) => {
+    async ({ page, pageSize, ordering, startedAfter, startedBefore }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
-        const response = await client.getTestRuns(page, pageSize, ordering, startedAfter, startedBefore);
+
+        const response = await bugbugClient.getTestRuns(page, pageSize, ordering, startedAfter, startedBefore);
         
         if (response.status !== 200) {
           return {
@@ -63,10 +63,10 @@ export function registerBugBugTestRunTools(server: McpServer): void {
   );
 
   server.tool(
-    'bugbug_create_test_run',
+    'create_test_run',
     'Execute a BugBug test',
     {
-      apiToken: z.string().describe('BugBug API token'),
+      
       testId: z.string().describe('Test UUID to execute'),
       profileName: z.string().optional().describe('Profile name to use for execution'),
       variables: z.array(z.object({
@@ -75,9 +75,9 @@ export function registerBugBugTestRunTools(server: McpServer): void {
       })).optional().describe('Override variables for the test run'),
       triggeredBy: z.enum(['user', 'api', 'scheduler', 'github', 'cli']).optional().default('api').describe('Who triggered the run'),
     },
-    async ({ apiToken, testId, profileName, variables, triggeredBy }) => {
+    async ({ testId, profileName, variables, triggeredBy }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
+
         const data = {
           testId,
           profileName,
@@ -85,7 +85,7 @@ export function registerBugBugTestRunTools(server: McpServer): void {
           triggeredBy: triggeredBy || 'api',
         };
         
-        const response = await client.createTestRun(data);
+        const response = await bugbugClient.createTestRun(data);
         
         if (response.status !== 200) {
           return {
@@ -122,16 +122,16 @@ export function registerBugBugTestRunTools(server: McpServer): void {
   );
 
   server.tool(
-    'bugbug_get_test_run',
+    'get_test_run',
     'Get detailed results of a BugBug test run',
     {
-      apiToken: z.string().describe('BugBug API token'),
+      
       runId: z.string().describe('Test run UUID'),
     },
-    async ({ apiToken, runId }) => {
+    async ({ runId }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
-        const response = await client.getTestRun(runId);
+
+        const response = await bugbugClient.getTestRun(runId);
         
         if (response.status !== 200) {
           return {
@@ -177,16 +177,16 @@ export function registerBugBugTestRunTools(server: McpServer): void {
   );
 
   server.tool(
-    'bugbug_get_test_run_status',
+    'get_test_run_status',
     'Get current status of a BugBug test run',
     {
-      apiToken: z.string().describe('BugBug API token'),
+      
       runId: z.string().describe('Test run UUID'),
     },
-    async ({ apiToken, runId }) => {
+    async ({ runId }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
-        const response = await client.getTestRunStatus(runId);
+
+        const response = await bugbugClient.getTestRunStatus(runId);
         
         if (response.status !== 200) {
           return {
@@ -223,16 +223,16 @@ export function registerBugBugTestRunTools(server: McpServer): void {
   );
 
   server.tool(
-    'bugbug_get_test_run_screenshots',
+    'get_test_run_screenshots',
     'Get screenshots from a BugBug test run',
     {
-      apiToken: z.string().describe('BugBug API token'),
+      
       runId: z.string().describe('Test run UUID'),
     },
-    async ({ apiToken, runId }) => {
+    async ({ runId }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
-        const response = await client.getTestRunScreenshots(runId);
+
+        const response = await bugbugClient.getTestRunScreenshots(runId);
         
         if (response.status !== 200) {
           return {
@@ -278,16 +278,16 @@ export function registerBugBugTestRunTools(server: McpServer): void {
   );
 
   server.tool(
-    'bugbug_stop_test_run',
+    'stop_test_run',
     'Stop a running BugBug test run',
     {
-      apiToken: z.string().describe('BugBug API token'),
+      
       runId: z.string().describe('Test run UUID to stop'),
     },
-    async ({ apiToken, runId }) => {
+    async ({ runId }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
-        const response = await client.stopTestRun(runId);
+
+        const response = await bugbugClient.stopTestRun(runId);
         
         if (response.status !== 200) {
           return {

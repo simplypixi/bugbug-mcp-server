@@ -1,12 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerBugBugTestRunTools } from '../testRuns.js';
-import { BugBugApiClient } from '../../../utils/bugbugClient.js';
-
-// Mock the BugBugApiClient
-vi.mock('../../../utils/bugbugClient.js', () => ({
-  BugBugApiClient: vi.fn(),
-}));
+import type { BugBugApiClient } from '../../../utils/bugbugClient.js';
 
 describe('BugBug Test Run Tools', () => {
   let mockServer: McpServer;
@@ -26,27 +21,25 @@ describe('BugBug Test Run Tools', () => {
       getTestRunScreenshots: vi.fn(),
       stopTestRun: vi.fn(),
       getTestRuns: vi.fn(),
-    };
-    
-    vi.mocked(BugBugApiClient).mockImplementation(() => mockClient);
+    } as any;
     
     // Arrange - Create mock server
     mockServer = {
       tool: vi.fn((name, description, schema, handler) => {
-        if (name === 'bugbug_create_test_run') createTestRunHandler = handler;
-        if (name === 'bugbug_get_test_run') getTestRunHandler = handler;
-        if (name === 'bugbug_get_test_run_status') getTestRunStatusHandler = handler;
+        if (name === 'create_test_run') createTestRunHandler = handler;
+        if (name === 'get_test_run') getTestRunHandler = handler;
+        if (name === 'get_test_run_status') getTestRunStatusHandler = handler;
       }),
     } as any;
 
-    registerBugBugTestRunTools(mockServer);
+    registerBugBugTestRunTools(mockServer, mockClient);
   });
 
   it('should register all test run tools', () => {
     // Assert
     expect(mockServer.tool).toHaveBeenCalledTimes(6);
     expect(mockServer.tool).toHaveBeenCalledWith(
-      'bugbug_create_test_run',
+      'create_test_run',
       'Execute a BugBug test',
       expect.any(Object),
       expect.any(Function)
@@ -55,6 +48,7 @@ describe('BugBug Test Run Tools', () => {
 
   it('should successfully create a test run', async () => {
     // Arrange
+    process.env.API_KEY = 'test-token';
     const mockResponse = {
       status: 200,
       data: {
@@ -67,8 +61,8 @@ describe('BugBug Test Run Tools', () => {
     mockClient.createTestRun.mockResolvedValue(mockResponse);
 
     // Act
+    process.env.API_KEY = 'test-token';
     const result = await createTestRunHandler({
-      apiToken: 'test-token',
       testId: 'test-123',
       profileName: 'default',
     });
@@ -104,8 +98,9 @@ describe('BugBug Test Run Tools', () => {
     mockClient.getTestRun.mockResolvedValue(mockResponse);
 
     // Act
+    process.env.API_KEY = 'test-token';
     const result = await getTestRunHandler({
-      apiToken: 'test-token',
+      
       runId: 'test-run-123',
     });
 
@@ -132,8 +127,9 @@ describe('BugBug Test Run Tools', () => {
     mockClient.getTestRunStatus.mockResolvedValue(mockResponse);
 
     // Act
+    process.env.API_KEY = 'test-token';
+    process.env.API_KEY = 'test-token';
     const result = await getTestRunStatusHandler({
-      apiToken: 'test-token',
       runId: 'test-run-123',
     });
 
@@ -152,8 +148,9 @@ describe('BugBug Test Run Tools', () => {
     });
 
     // Act
+    process.env.API_KEY = 'test-token';
     const result = await createTestRunHandler({
-      apiToken: 'test-token',
+      
       testId: 'invalid-test-id',
     });
 
@@ -166,8 +163,9 @@ describe('BugBug Test Run Tools', () => {
     mockClient.getTestRun.mockRejectedValue(new Error('Connection timeout'));
 
     // Act
+    process.env.API_KEY = 'test-token';
     const result = await getTestRunHandler({
-      apiToken: 'test-token',
+      
       runId: 'test-run-123',
     });
 

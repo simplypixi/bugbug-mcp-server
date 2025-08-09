@@ -1,13 +1,12 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { BugBugApiClient } from '../../utils/bugbugClient.js';
+import type { BugBugApiClient } from '../../utils/bugbugClient.js';
 
-export function registerBugBugSuiteRunTools(server: McpServer): void {
+export function registerBugBugSuiteRunTools(server: McpServer, bugbugClient: BugBugApiClient): void {
   server.tool(
-    'bugbug_create_suite_run',
+    'create_suite_run',
     'Execute a BugBug test suite',
     {
-      apiToken: z.string().describe('BugBug API token'),
       suiteId: z.string().describe('Suite UUID to execute'),
       profileName: z.string().optional().describe('Profile name to use for execution'),
       variables: z.array(z.object({
@@ -16,9 +15,9 @@ export function registerBugBugSuiteRunTools(server: McpServer): void {
       })).optional().describe('Override variables for the suite run'),
       triggeredBy: z.enum(['user', 'api', 'scheduler', 'github', 'cli']).optional().default('api').describe('Who triggered the run'),
     },
-    async ({ apiToken, suiteId, profileName, variables, triggeredBy }) => {
+    async ({ suiteId, profileName, variables, triggeredBy }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
+
         const data = {
           suiteId,
           profileName,
@@ -26,7 +25,7 @@ export function registerBugBugSuiteRunTools(server: McpServer): void {
           triggeredBy: triggeredBy || 'api',
         };
         
-        const response = await client.createSuiteRun(data);
+        const response = await bugbugClient.createSuiteRun(data);
         
         if (response.status !== 200) {
           return {
@@ -63,16 +62,16 @@ export function registerBugBugSuiteRunTools(server: McpServer): void {
   );
 
   server.tool(
-    'bugbug_get_suite_run',
+    'get_suite_run',
     'Get detailed results of a BugBug suite run',
     {
-      apiToken: z.string().describe('BugBug API token'),
+      
       runId: z.string().describe('Suite run UUID'),
     },
-    async ({ apiToken, runId }) => {
+    async ({ runId }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
-        const response = await client.getSuiteRun(runId);
+
+        const response = await bugbugClient.getSuiteRun(runId);
         
         if (response.status !== 200) {
           return {
@@ -118,16 +117,16 @@ export function registerBugBugSuiteRunTools(server: McpServer): void {
   );
 
   server.tool(
-    'bugbug_get_suite_run_status',
+    'get_suite_run_status',
     'Get current status of a BugBug suite run',
     {
-      apiToken: z.string().describe('BugBug API token'),
+      
       runId: z.string().describe('Suite run UUID'),
     },
-    async ({ apiToken, runId }) => {
+    async ({ runId }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
-        const response = await client.getSuiteRunStatus(runId);
+
+        const response = await bugbugClient.getSuiteRunStatus(runId);
         
         if (response.status !== 200) {
           return {
@@ -164,16 +163,16 @@ export function registerBugBugSuiteRunTools(server: McpServer): void {
   );
 
   server.tool(
-    'bugbug_get_suite_run_screenshots',
+    'get_suite_run_screenshots',
     'Get screenshots from a BugBug suite run',
     {
-      apiToken: z.string().describe('BugBug API token'),
+      
       runId: z.string().describe('Suite run UUID'),
     },
-    async ({ apiToken, runId }) => {
+    async ({ runId }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
-        const response = await client.getSuiteRunScreenshots(runId);
+
+        const response = await bugbugClient.getSuiteRunScreenshots(runId);
         
         if (response.status !== 200) {
           return {
@@ -223,16 +222,16 @@ export function registerBugBugSuiteRunTools(server: McpServer): void {
   );
 
   server.tool(
-    'bugbug_stop_suite_run',
+    'stop_suite_run',
     'Stop a running BugBug suite run',
     {
-      apiToken: z.string().describe('BugBug API token'),
+      
       runId: z.string().describe('Suite run UUID to stop'),
     },
-    async ({ apiToken, runId }) => {
+    async ({ runId }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
-        const response = await client.stopSuiteRun(runId);
+
+        const response = await bugbugClient.stopSuiteRun(runId);
         
         if (response.status !== 200) {
           return {

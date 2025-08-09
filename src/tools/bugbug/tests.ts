@@ -1,22 +1,21 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { BugBugApiClient } from '../../utils/bugbugClient.js';
+import type { BugBugApiClient } from '../../utils/bugbugClient.js';
 
-export function registerBugBugTestTools(server: McpServer): void {
+export function registerBugBugTestTools(server: McpServer, bugbugClient: BugBugApiClient): void {
   server.tool(
-    'bugbug_get_tests',
+    'get_tests',
     'Get list of BugBug tests',
     {
-      apiToken: z.string().describe('BugBug API token'),
       page: z.number().optional().describe('Page number for pagination'),
       pageSize: z.number().optional().describe('Number of results per page'),
       query: z.string().optional().describe('Search query for test names'),
       ordering: z.enum(['name', '-name', 'created', '-created', 'last_result', '-last_result']).optional().describe('Sort order'),
     },
-    async ({ apiToken, page, pageSize, query, ordering }) => {
+    async ({ page, pageSize, query, ordering }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
-        const response = await client.getTests(page, pageSize, query, ordering);
+
+        const response = await bugbugClient.getTests(page, pageSize, query, ordering);
         
         if (response.status !== 200) {
           return {
@@ -62,16 +61,15 @@ export function registerBugBugTestTools(server: McpServer): void {
   );
 
   server.tool(
-    'bugbug_get_test',
+    'get_test',
     'Get details of a specific BugBug test',
     {
-      apiToken: z.string().describe('BugBug API token'),
       testId: z.string().describe('Test UUID'),
     },
-    async ({ apiToken, testId }) => {
+    async ({ testId }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
-        const response = await client.getTest(testId);
+
+        const response = await bugbugClient.getTest(testId);
         
         if (response.status !== 200) {
           return {
@@ -108,23 +106,22 @@ export function registerBugBugTestTools(server: McpServer): void {
   );
 
   server.tool(
-    'bugbug_update_test',
+    'update_test',
     'Update a BugBug test (full update)',
     {
-      apiToken: z.string().describe('BugBug API token'),
       testId: z.string().describe('Test UUID'),
       name: z.string().describe('Test name'),
       isActive: z.boolean().describe('Whether the test is active'),
     },
-    async ({ apiToken, testId, name, isActive }) => {
+    async ({ testId, name, isActive }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
+
         const data = {
           name,
           isActive,
         };
         
-        const response = await client.updateTest(testId, data);
+        const response = await bugbugClient.updateTest(testId, data);
         
         if (response.status !== 200) {
           return {
@@ -161,23 +158,22 @@ export function registerBugBugTestTools(server: McpServer): void {
   );
 
   server.tool(
-    'bugbug_partial_update_test',
+    'partial_update_test',
     'Partially update a BugBug test',
     {
-      apiToken: z.string().describe('BugBug API token'),
       testId: z.string().describe('Test UUID'),
       name: z.string().optional().describe('Test name'),
       isActive: z.boolean().optional().describe('Whether the test is active'),
     },
-    async ({ apiToken, testId, name, isActive }) => {
+    async ({ testId, name, isActive }) => {
       try {
-        const client = new BugBugApiClient({ apiToken });
+
         const data: any = {};
         
         if (name !== undefined) data.name = name;
         if (isActive !== undefined) data.isActive = isActive;
         
-        const response = await client.partialUpdateTest(testId, data);
+        const response = await bugbugClient.partialUpdateTest(testId, data);
         
         if (response.status !== 200) {
           return {

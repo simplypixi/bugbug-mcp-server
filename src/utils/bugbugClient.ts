@@ -18,6 +18,17 @@ export class BugBugApiClient {
     this.baseUrl = config.baseUrl || 'https://app.bugbug.io/api/v1';
   }
 
+  async verifyConnection(): Promise<void> {
+    try {
+      const response = await this.getIpAddresses();
+      if (response.status !== 200) {
+        throw new Error(`API verification failed: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      throw new Error(`Failed to verify BugBug API connection: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
   private async makeRequest<T = any>(
     endpoint: string,
     method: 'GET' | 'POST' | 'PUT' | 'PATCH' = 'GET',
