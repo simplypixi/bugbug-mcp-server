@@ -1,0 +1,106 @@
+name: Publish to NPM
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run (do not actually publish)"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-and-publish:
+    name: Release and Publish to NPM
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0 # Fetch full history for conventional commits
+          ref: ${{ github.ref }} # Ensure we're on the correct ref
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".node-version"
+          cache: "npm"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Verify dependencies
+        run: |
+          echo "Checking installed release-it:"
+          npm list release-it || echo "release-it not found"
+          echo "Available scripts:"
+          npm run
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build project
+        run: npm run build
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Dry run release
+        if: ${{ inputs.dry_run }}
+        run: |
+          echo " Dry run mode - showing what would be released:"
+          npm run release:dry-run
+          echo " Would publish to NPM with:"
+          npm publish --dry-run
+
+      - name: Create release and publish
+        if: ${{ !inputs.dry_run }}
+        id: release
+        run: |
+          # Let release-it handle everything: version detection, changelog, git operations
+          npm run release
+
+          # Get the new version for outputs (if release was created)
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          NEW_TAG="v$NEW_VERSION"
+
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$NEW_TAG" >> $GITHUB_OUTPUT
+
+      - name: Publish to NPM
+        uses: JS-DevTools/npm-publish@v3
+        if: ${{ !inputs.dry_run }}
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          package: package.json
+
+      - name: Create GitHub Release
+        if: ${{ !inputs.dry_run }}
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.release.outputs.tag }}
+          name: Release ${{ steps.release.outputs.version }}
+          body_path: CHANGELOG.md
+          append_body: true
+          body: |
+
+            ---
+            📦 **NPM Package**: [bugbug-mcp-server@${{ steps.release.outputs.version }}](https://www.npmjs.com/package/bugbug-mcp-server/v/${{ steps.release.outputs.version }})
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

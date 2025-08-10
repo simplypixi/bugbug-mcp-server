@@ -1,0 +1,36 @@
+# Source files
+src/
+tsconfig.json
+vitest.config.ts
+
+# Development files
+.git/
+.gitignore
+node_modules/
+*.log
+*.tgz
+
+# Test files
+**/*.test.*
+**/*.spec.*
+**/*.vitest.*
+**/__tests__/
+coverage/
+
+# Development tools
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Build artifacts (keep only dist)
+*.tsbuildinfo
