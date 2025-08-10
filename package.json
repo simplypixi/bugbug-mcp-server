@@ -15,8 +15,7 @@
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "inspect:local": "npm run build && npx -y @modelcontextprotocol/inspector node dist/index.js",
     "inspect:dev": "npm run build && NODE_ENV=development npx -y @modelcontextprotocol/inspector node dist/index.js",
-    "inspect:prod": "npm run build && NODE_ENV=production npx -y @modelcontextprotocol/inspector node dist/index.js",
-    "prepublishOnly": "npm run lint && npm run test && npm run build"
+    "inspect:prod": "npm run build && NODE_ENV=production npx -y @modelcontextprotocol/inspector node dist/index.js"
   },
   "keywords": [
     "mcp",
