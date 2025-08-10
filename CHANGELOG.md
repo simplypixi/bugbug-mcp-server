@@ -1,5 +1,12 @@
 
 
+## [0.0.5](https://github.com/simplypixi/bugbug-mcp-server/compare/v0.0.4...v0.0.5) (2025-08-10)
+
+
+### Bug Fixes
+
+* Add missing bin field ([ed25c9f](https://github.com/simplypixi/bugbug-mcp-server/commit/ed25c9f4ab74ca2757cd60d7dfcd8ee0ce2a053c))
+
 ## [0.0.4](https://github.com/simplypixi/bugbug-mcp-server/compare/v0.0.3...v0.0.4) (2025-08-10)
 
 
