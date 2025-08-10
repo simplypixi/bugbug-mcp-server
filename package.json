@@ -1,6 +1,6 @@
 {
   "name": "@simplypixi/bugbug-mcp-server",
-  "version": "0.0.0",
+  "version": "0.0.2",
   "description": "A Model Context Protocol server for BugBug functionality",
   "type": "module",
   "main": "dist/index.js",
