@@ -1,20 +1,17 @@
 #!/usr/bin/env node
 
+import { loadEnvironmentConfig } from './utils/config.js';
+loadEnvironmentConfig();
+
+import { initializeSentry, captureException, captureMessage, addBreadcrumb, closeSentry } from './utils/sentry.js';
+initializeSentry();
+
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { BugBugApiClient } from './utils/bugbugClient.js';
 import { registerAllTools } from './tools/index.js';
-import { loadEnvironmentConfig } from './utils/config.js';
-import { initializeSentry, captureException, captureMessage, addBreadcrumb, closeSentry } from './utils/sentry.js';
-
 // Start the server
 async function main() {
-  // Load environment configuration first
-  loadEnvironmentConfig();
-  
-  // Initialize Sentry after environment is loaded
-  initializeSentry();
-  
   try {
     addBreadcrumb('Starting BugBug MCP Server', 'server');
     
