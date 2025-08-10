@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { BugBugApiClient } from '../../utils/bugbugClient.js';
+import type { BugBugTest } from '../../types/bugbug.types.js';
 
 export function registerBugBugTestTools(server: McpServer, bugbugClient: BugBugApiClient): void {
   server.tool(
@@ -32,7 +33,7 @@ export function registerBugBugTestTools(server: McpServer, bugbugClient: BugBugA
         
         let testsList = '';
         if (results && results.length > 0) {
-          testsList = results.map((test: any) => 
+          testsList = results.map((test: BugBugTest) => 
             `- **${test.name}** (ID: ${test.id}) - Active: ${test.isActive ? 'Yes' : 'No'}${test.isRecording ? ' [RECORDING]' : ''}`
           ).join('\n');
         } else {
@@ -168,7 +169,7 @@ export function registerBugBugTestTools(server: McpServer, bugbugClient: BugBugA
     async ({ testId, name, isActive }) => {
       try {
 
-        const data: any = {};
+        const data: Partial<BugBugTest> = {};
         
         if (name !== undefined) data.name = name;
         if (isActive !== undefined) data.isActive = isActive;

@@ -3,10 +3,14 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerBugBugConfigTools } from '../config.js';
 import type { BugBugApiClient } from '../../../utils/bugbugClient.js';
 
+interface MockToolHandler {
+  (): Promise<{ content: Array<{ type: string; text: string }> }>;
+}
+
 describe('BugBug Config Tools', () => {
   let mockServer: McpServer;
-  let toolHandler: any;
-  let mockClient: BugBugApiClient;
+  let toolHandler: MockToolHandler;
+  let mockClient: Partial<BugBugApiClient>;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -15,7 +19,7 @@ describe('BugBug Config Tools', () => {
     const mockGetIpAddresses = vi.fn();
     mockClient = {
       getIpAddresses: mockGetIpAddresses,
-    } as any;
+    };
     
     // Arrange - Create mock server
     mockServer = {
@@ -24,7 +28,7 @@ describe('BugBug Config Tools', () => {
           toolHandler = handler;
         }
       }),
-    } as any;
+    } as never;
 
     registerBugBugConfigTools(mockServer, mockClient);
   });

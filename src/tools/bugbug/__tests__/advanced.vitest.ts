@@ -1,11 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerBugBugAdvancedTools } from '../advanced.js';
 import type { BugBugApiClient } from '../../../utils/bugbugClient.js';
 
+interface MockServer {
+  tool: ReturnType<typeof vi.fn>;
+}
+
 describe('BugBug Advanced Tools', () => {
-  let mockServer: McpServer;
-  let mockClient: BugBugApiClient;
+  let mockServer: MockServer;
+  let mockClient: Partial<BugBugApiClient>;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -21,14 +24,14 @@ describe('BugBug Advanced Tools', () => {
       getTests: vi.fn(),
       getTest: vi.fn(),
       createTestRun: vi.fn(),
-    } as any;
+    };
 
     // Create mock server
     mockServer = {
       tool: vi.fn(),
-    } as any;
+    };
 
-    registerBugBugAdvancedTools(mockServer, mockClient);
+    registerBugBugAdvancedTools(mockServer as never, mockClient as BugBugApiClient);
   });
 
   it('should register all advanced tools with correct parameters', () => {

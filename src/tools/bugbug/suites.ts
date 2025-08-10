@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { BugBugApiClient } from '../../utils/bugbugClient.js';
+import type { BugBugSuite } from '../../types/bugbug.types.js';
 
 export function registerBugBugSuiteTools(server: McpServer, bugbugClient: BugBugApiClient): void {
   server.tool(
@@ -31,7 +32,7 @@ export function registerBugBugSuiteTools(server: McpServer, bugbugClient: BugBug
         
         let suitesList = '';
         if (results && results.length > 0) {
-          suitesList = results.map((suite: any) => 
+          suitesList = results.map((suite: BugBugSuite) => 
             `- **${suite.name || 'Unnamed Suite'}** (ID: ${suite.id}) - ${suite.testsCount || 0} tests`
           ).join('\n');
         } else {

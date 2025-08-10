@@ -1,12 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerBugBugTestRunTools } from '../testRuns.js';
+import type { BugBugApiClient } from '../../../utils/bugbugClient.js';
+
+interface MockTestRunHandler {
+  (args: { runId: string }): Promise<{ content: Array<{ type: string; text: string }> }>;
+}
+
+interface MockTestRunStatusHandler {
+  (args: { runId: string }): Promise<{ content: Array<{ type: string; text: string }> }>;
+}
 
 describe('BugBug Test Run Tools', () => {
   let mockServer: McpServer;
-  let mockClient: any;
-  let getTestRunHandler: any;
-  let getTestRunStatusHandler: any;
+  let mockClient: Partial<BugBugApiClient>;
+  let getTestRunHandler: MockTestRunHandler;
+  let getTestRunStatusHandler: MockTestRunStatusHandler;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -19,7 +28,7 @@ describe('BugBug Test Run Tools', () => {
       getTestRunScreenshots: vi.fn(),
       stopTestRun: vi.fn(),
       getTestRuns: vi.fn(),
-    } as any;
+    };
     
     // Arrange - Create mock server
     mockServer = {
@@ -27,7 +36,7 @@ describe('BugBug Test Run Tools', () => {
         if (name === 'get_test_run') getTestRunHandler = handler;
         if (name === 'get_test_run_status') getTestRunStatusHandler = handler;
       }),
-    } as any;
+    } as never;
 
     registerBugBugTestRunTools(mockServer, mockClient);
   });
@@ -47,8 +56,8 @@ describe('BugBug Test Run Tools', () => {
         status: 'passed',
         duration: '00:02:30',
         details: [
-          { id: 'step-1', step: { type: 'goto' }, status: 'passed' },
-          { id: 'step-2', step: { type: 'click' }, status: 'passed' },
+          { id: 'step-1', stepId: 'goto', name: 'goto', status: 'passed' },
+          { id: 'step-2', stepId: 'click', name: 'click', status: 'passed' },
         ],
         webappUrl: 'https://app.bugbug.io/run/test-run-123',
       },

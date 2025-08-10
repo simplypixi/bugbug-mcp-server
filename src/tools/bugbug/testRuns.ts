@@ -1,5 +1,9 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import {
+  BugBugStepDetail,
+  BugBugTestRun
+} from '../../types/bugbug.types.js';
 import type { BugBugApiClient } from '../../utils/bugbugClient.js';
 
 export function registerBugBugTestRunTools(server: McpServer, bugbugClient: BugBugApiClient): void {
@@ -34,7 +38,7 @@ export function registerBugBugTestRunTools(server: McpServer, bugbugClient: BugB
         
         let runsList = '';
         if (results && results.length > 0) {
-          runsList = results.map((run: any) => 
+          runsList = results.map((run: BugBugTestRun) => 
             `- **${run.status}** (ID: ${run.id}) - Started: ${run.started || 'N/A'} - Duration: ${run.duration || 'N/A'}`
           ).join('\n');
         } else {
@@ -89,8 +93,8 @@ export function registerBugBugTestRunTools(server: McpServer, bugbugClient: BugB
         
         let stepDetails = '';
         if (run.details && run.details.length > 0) {
-          stepDetails = run.details.map((step: any) => 
-            `  - **Step ${step.step.type}** (ID: ${step.id}) - Status: ${step.status}`
+          stepDetails = run.details.map((step: BugBugStepDetail) => 
+            `  - **Step ${step.stepId}** (ID: ${step.id}) - Status: ${step.status}`
           ).join('\n');
         } else {
           stepDetails = '  No step details available';
@@ -127,20 +131,20 @@ export function registerBugBugTestRunTools(server: McpServer, bugbugClient: BugB
     async ({ runId }) => {
       try {
 
-        const response = await bugbugClient.getTestRunStatus(runId);
+        const statusResponse = await bugbugClient.getTestRunStatus(runId);
         
-        if (response.status !== 200) {
+        if (statusResponse.status !== 200) {
           return {
             content: [
               {
                 type: 'text',
-                text: `Error: ${response.status} ${response.statusText}`,
+                text: `Error: ${statusResponse.status} ${statusResponse.statusText}`,
               },
             ],
           };
         }
 
-        const status = response.data;
+        const status = statusResponse.data;
         
         return {
           content: [
@@ -190,8 +194,8 @@ export function registerBugBugTestRunTools(server: McpServer, bugbugClient: BugB
         
         let screenshotsList = '';
         if (screenshots.stepsRuns && screenshots.stepsRuns.length > 0) {
-          screenshotsList = screenshots.stepsRuns.map((step: any) => 
-            `- **Step ${step.stepId}:** ${step.screenshotUrl}`
+          screenshotsList = screenshots.stepsRuns.map((step: BugBugStepDetail) => 
+            `- **Step ${step.stepId}:** ${step.screenshots?.[0]?.url || 'No screenshot'}`
           ).join('\n');
         } else {
           screenshotsList = 'No screenshots available';

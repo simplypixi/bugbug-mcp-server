@@ -3,29 +3,38 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { registerAllTools } from '../tools/index.js';
 
-// Mock the modules
+// Mock the dependencies
 vi.mock('@modelcontextprotocol/sdk/server/mcp.js');
 vi.mock('@modelcontextprotocol/sdk/server/stdio.js');
 vi.mock('../tools/index.js');
 
-describe('MCP Server Integration', () => {
-  let mockServer: any;
-  let mockTransport: any;
+interface MockServer {
+  tool: ReturnType<typeof vi.fn>;
+  connect: ReturnType<typeof vi.fn>;
+}
+
+interface MockTransport {
+  start: ReturnType<typeof vi.fn>;
+}
+
+describe('Main Server', () => {
+  let mockServer: MockServer;
+  let mockTransport: MockTransport;
 
   beforeEach(() => {
     vi.clearAllMocks();
     
     mockServer = {
-      connect: vi.fn(),
       tool: vi.fn(),
+      connect: vi.fn(),
     };
     
     mockTransport = {
       start: vi.fn(),
     };
     
-    vi.mocked(McpServer).mockImplementation(() => mockServer);
-    vi.mocked(StdioServerTransport).mockImplementation(() => mockTransport);
+    vi.mocked(McpServer).mockImplementation(() => mockServer as unknown as McpServer);
+    vi.mocked(StdioServerTransport).mockImplementation(() => mockTransport as unknown as StdioServerTransport);
     vi.mocked(registerAllTools).mockImplementation(() => {});
   });
 

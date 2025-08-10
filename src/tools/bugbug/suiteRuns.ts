@@ -1,5 +1,11 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import {
+  BugBugStepDetail,
+  BugBugTestDetail,
+  BugBugSuiteRun,
+  BugBugTriggerSource
+} from '../../types/bugbug.types.js';
 import type { BugBugApiClient } from '../../utils/bugbugClient.js';
 
 export function registerBugBugSuiteRunTools(server: McpServer, bugbugClient: BugBugApiClient): void {
@@ -21,8 +27,8 @@ export function registerBugBugSuiteRunTools(server: McpServer, bugbugClient: Bug
         const data = {
           suiteId,
           profileName,
-          variables,
-          triggeredBy: triggeredBy || 'api',
+          variables: variables?.filter(v => v.value !== undefined).map(v => ({ key: v.key, value: v.value! })),
+          triggeredBy: (triggeredBy || 'api') as BugBugTriggerSource,
         };
         
         const response = await bugbugClient.createSuiteRun(data);
@@ -38,7 +44,7 @@ export function registerBugBugSuiteRunTools(server: McpServer, bugbugClient: Bug
           };
         }
 
-        const run = response.data;
+        const run = response.data as BugBugSuiteRun;
         
         return {
           content: [
@@ -84,11 +90,11 @@ export function registerBugBugSuiteRunTools(server: McpServer, bugbugClient: Bug
           };
         }
 
-        const run = response.data;
+        const run = response.data as BugBugSuiteRun;
         
         let testDetails = '';
         if (run.details && run.details.length > 0) {
-          testDetails = run.details.map((test: any) => 
+          testDetails = run.details.map((test: BugBugTestDetail) => 
             `  - **${test.name}** (${test.status}) - Duration: ${test.duration || 'N/A'}`
           ).join('\n');
         } else {
@@ -126,20 +132,20 @@ export function registerBugBugSuiteRunTools(server: McpServer, bugbugClient: Bug
     async ({ runId }) => {
       try {
 
-        const response = await bugbugClient.getSuiteRunStatus(runId);
+        const statusResponse = await bugbugClient.getSuiteRunStatus(runId);
         
-        if (response.status !== 200) {
+        if (statusResponse.status !== 200) {
           return {
             content: [
               {
                 type: 'text',
-                text: `Error: ${response.status} ${response.statusText}`,
+                text: `Error: ${statusResponse.status} ${statusResponse.statusText}`,
               },
             ],
           };
         }
 
-        const status = response.data;
+        const status = statusResponse.data;
         
         return {
           content: [
@@ -189,9 +195,9 @@ export function registerBugBugSuiteRunTools(server: McpServer, bugbugClient: Bug
         
         let screenshotsList = '';
         if (screenshots.testsRuns && screenshots.testsRuns.length > 0) {
-          screenshotsList = screenshots.testsRuns.map((testRun: any) => {
-            const stepScreenshots = testRun.stepsRuns?.map((step: any) => 
-              `    - Step ${step.stepId}: ${step.screenshotUrl}`
+          screenshotsList = screenshots.testsRuns.map((testRun: { id: string; name: string; stepsRuns?: BugBugStepDetail[] }) => {
+            const stepScreenshots = testRun.stepsRuns?.map((step: BugBugStepDetail) => 
+              `    - Step ${step.stepId}: ${step.screenshots?.[0]?.url || 'No screenshot'}`
             ).join('\n') || '    No step screenshots';
             
             return `  **Test ${testRun.id}:**\n${stepScreenshots}`;

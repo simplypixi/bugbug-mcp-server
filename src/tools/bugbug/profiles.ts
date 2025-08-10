@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { BugBugApiClient } from '../../utils/bugbugClient.js';
+import type { BugBugProfile } from '../../types/bugbug.types.js';
 
 export function registerBugBugProfileTools(server: McpServer, bugbugClient: BugBugApiClient): void {
   server.tool(
@@ -29,7 +30,7 @@ export function registerBugBugProfileTools(server: McpServer, bugbugClient: BugB
         
         let profilesList = '';
         if (results && results.length > 0) {
-          profilesList = results.map((profile: any) => 
+          profilesList = results.map((profile: BugBugProfile) => 
             `- **${profile.name}** (ID: ${profile.id})${profile.isDefault ? ' [DEFAULT]' : ''}`
           ).join('\n');
         } else {

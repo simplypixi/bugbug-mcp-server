@@ -1,6 +1,13 @@
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { BugBugApiClient } from '../../utils/bugbugClient.js';
+import {
+  BugBugStepDetail,
+  BugBugTestDetail,
+  BugBugTest,
+  BugBugTestRun,
+  BugBugSuiteRun
+} from '../../types/bugbug.types.js';
 
 export function registerBugBugAdvancedTools(server: McpServer, bugbugClient: BugBugApiClient): void {
   server.tool(
@@ -19,7 +26,7 @@ export function registerBugBugAdvancedTools(server: McpServer, bugbugClient: Bug
 
         while (Date.now() - startTime < timeoutMs) {
           const statusResponse = await bugbugClient.getTestRunStatus(runId);
-          
+
           if (statusResponse.status !== 200) {
             return {
               content: [
@@ -53,7 +60,7 @@ export function registerBugBugAdvancedTools(server: McpServer, bugbugClient: Bug
             
             let stepDetails = '';
             if (run.details && run.details.length > 0) {
-              stepDetails = run.details.map((step: any) => 
+              stepDetails = run.details.map((step: BugBugStepDetail) => 
                 `  - **Step ${step.stepId}:** ${step.status} - ${step.name || 'N/A'} (Duration: ${step.duration || 'N/A'})`
               ).join('\n');
             } else {
@@ -147,7 +154,7 @@ export function registerBugBugAdvancedTools(server: McpServer, bugbugClient: Bug
             
             let testDetails = '';
             if (run.details && run.details.length > 0) {
-              testDetails = run.details.map((test: any) => 
+              testDetails = run.details.map((test: BugBugTestDetail) => 
                 `  - **${test.name}** (${test.status}) - Duration: ${test.duration || 'N/A'} - Error: ${test.errorCode || 'None'}`
               ).join('\n');
             } else {
@@ -315,8 +322,8 @@ export function registerBugBugAdvancedTools(server: McpServer, bugbugClient: Bug
         const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
         const startedAfter = yesterday.toISOString();
 
-        let testRuns: any[] = [];
-        let suiteRuns: any[] = [];
+        let testRuns: BugBugTestRun[] = [];
+        let suiteRuns: BugBugSuiteRun[] = [];
 
         // Fetch test runs if requested
         if (runType === 'test') {
@@ -345,9 +352,9 @@ export function registerBugBugAdvancedTools(server: McpServer, bugbugClient: Bug
 
         // Combine and sort results
         const allRuns = [
-          ...testRuns.map((run: any) => ({ ...run, type: 'test' })),
-          ...suiteRuns.map((run: any) => ({ ...run, type: 'suite' }))
-        ].sort((a, b) => new Date(b.started || b.modified).getTime() - new Date(a.started || a.modified).getTime());
+          ...testRuns.map((run: BugBugTestRun) => ({ ...run, type: 'test' as const })),
+          ...suiteRuns.map((run: BugBugSuiteRun) => ({ ...run, type: 'suite' as const }))
+        ].sort((a, b) => new Date(b.started || b.modified || 0).getTime() - new Date(a.started || a.modified || 0).getTime());
 
         if (allRuns.length === 0) {
           return {
@@ -360,7 +367,7 @@ export function registerBugBugAdvancedTools(server: McpServer, bugbugClient: Bug
           };
         }
 
-        const runsList = allRuns.slice(0, pageSize).map((run: any) => {
+        const runsList = allRuns.slice(0, pageSize).map((run: (BugBugTestRun | BugBugSuiteRun) & { type: 'test' | 'suite' }) => {
           const startTime = run.started || run.modified || 'N/A';
           const duration = run.duration || 'N/A';
           const status = run.status || 'Unknown';
@@ -446,14 +453,14 @@ export function registerBugBugAdvancedTools(server: McpServer, bugbugClient: Bug
           }
 
           // Find exact match first, then partial match
-          let matchedTest = results.find((test: any) => test.name.toLowerCase() === testNameOrId.toLowerCase());
+          let matchedTest = results.find((test: BugBugTest) => test.name.toLowerCase() === testNameOrId.toLowerCase());
           
           if (!matchedTest) {
-            matchedTest = results.find((test: any) => test.name.toLowerCase().includes(testNameOrId.toLowerCase()));
+            matchedTest = results.find((test: BugBugTest) => test.name.toLowerCase().includes(testNameOrId.toLowerCase()));
           }
 
           if (!matchedTest) {
-            const testsList = results.slice(0, 5).map((test: any) => `- ${test.name} (${test.id})`).join('\n');
+            const testsList = results.slice(0, 5).map((test: BugBugTest) => `- ${test.name} (${test.id})`).join('\n');
             return {
               content: [
                 {
@@ -468,7 +475,7 @@ export function registerBugBugAdvancedTools(server: McpServer, bugbugClient: Bug
           
           // Show multiple matches if found
           if (results.length > 1) {
-            const matchesList = results.slice(0, 3).map((test: any) => 
+            const matchesList = results.slice(0, 3).map((test: BugBugTest) => 
               `- ${test.name} ${test.id === testId ? '← **SELECTED**' : ''}`
             ).join('\n');
             
@@ -487,8 +494,8 @@ export function registerBugBugAdvancedTools(server: McpServer, bugbugClient: Bug
         const data = {
           testId,
           profileName,
-          variables,
-          triggeredBy: 'api',
+          variables: variables?.filter(v => v.value !== undefined).map(v => ({ key: v.key, value: v.value! })),
+          triggeredBy: 'api' as const,
         };
         
         const response = await bugbugClient.createTestRun(data);

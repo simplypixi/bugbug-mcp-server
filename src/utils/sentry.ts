@@ -58,11 +58,11 @@ export function initializeSentry(): void {
 /**
  * Capture an exception with Sentry
  */
-export function captureException(error: Error, context?: Record<string, any>): void {
+export function captureException(error: Error, context?: Record<string, string | number | boolean>): void {
   if (context) {
     Sentry.withScope((scope: Sentry.Scope) => {
       Object.entries(context).forEach(([key, value]) => {
-        scope.setTag(key, value);
+        scope.setTag(key, String(value));
       });
       Sentry.captureException(error);
     });
@@ -74,11 +74,11 @@ export function captureException(error: Error, context?: Record<string, any>): v
 /**
  * Capture a message with Sentry
  */
-export function captureMessage(message: string, level: Sentry.SeverityLevel = 'info', context?: Record<string, any>): void {
+export function captureMessage(message: string, level: Sentry.SeverityLevel = 'info', context?: Record<string, string | number | boolean>): void {
   if (context) {
     Sentry.withScope((scope: Sentry.Scope) => {
       Object.entries(context).forEach(([key, value]) => {
-        scope.setTag(key, value);
+        scope.setTag(key, String(value));
       });
       Sentry.captureMessage(message, level);
     });
@@ -90,7 +90,7 @@ export function captureMessage(message: string, level: Sentry.SeverityLevel = 'i
 /**
  * Add breadcrumb for debugging
  */
-export function addBreadcrumb(message: string, category: string, data?: Record<string, any>): void {
+export function addBreadcrumb(message: string, category: string, data?: Record<string, unknown>): void {
   Sentry.addBreadcrumb({
     message,
     category,
