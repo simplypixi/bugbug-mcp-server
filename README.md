@@ -45,8 +45,7 @@ Add to your MCP settings:
       "command": "node",
       "args": ["/path/to/bugbug-mcp-server/dist/index.js"],
       "env": {
-        "API_KEY": "your_bugbug_api_token_here",
-        "SENTRY_DSN": "your_sentry_dsn_here_optional"
+        "API_KEY": "your_bugbug_api_token_here"
       }
     }
   }
@@ -110,7 +109,7 @@ This project uses automated versioning and publishing with [Release Please](http
 Use [Conventional Commits](https://www.conventionalcommits.org/) for automatic versioning:
 
 - `feat:` - New features (minor version bump)
-- `fix:` - Bug fixes (patch version bump)  
+- `fix:` - Bug fixes (patch version bump)
 - `feat!:` or `fix!:` - Breaking changes (major version bump)
 - `chore:`, `docs:`, `style:`, `refactor:`, `test:`, `ci:` - No version bump
 
