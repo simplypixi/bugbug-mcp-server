@@ -3,7 +3,7 @@
 import { loadEnvironmentConfig } from './utils/config.js';
 loadEnvironmentConfig();
 
-import { initializeSentry, captureException, captureMessage, addBreadcrumb, closeSentry } from './utils/sentry.js';
+import { initializeSentry, captureException, addBreadcrumb, closeSentry } from './utils/sentry.js';
 initializeSentry();
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -27,8 +27,7 @@ async function main() {
     addBreadcrumb('Creating BugBug API client', 'api');
     const bugbugClient = new BugBugApiClient({ apiToken });
     await bugbugClient.verifyConnection();
-    console.debug('BugBug API connection verified successfully');
-    captureMessage('BugBug API connection verified', 'info', { component: 'api' });
+    addBreadcrumb('BugBug API connection verified successfully', 'api');
 
     // Create server instance
     addBreadcrumb('Creating MCP server instance', 'server');
@@ -45,8 +44,7 @@ async function main() {
     addBreadcrumb('Starting server transport', 'server');
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    console.debug('BugBug MCP Server is running...');
-    captureMessage('BugBug MCP Server started successfully', 'info', { component: 'server' });
+    addBreadcrumb('BugBug MCP Server started successfully', 'server');
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('Failed to initialize BugBug MCP Server:', errorMessage);
