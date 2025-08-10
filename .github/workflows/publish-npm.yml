@@ -89,6 +89,7 @@ jobs:
         with:
           token: ${{ secrets.NPM_TOKEN }}
           package: package.json
+          access: public
 
       - name: Create GitHub Release
         if: ${{ !inputs.dry_run }}
