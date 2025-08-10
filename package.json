@@ -4,6 +4,9 @@
   "description": "A Model Context Protocol server for BugBug functionality",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "bugbug-mcp-server": "dist/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
