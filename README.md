@@ -4,7 +4,7 @@
 
 # BugBug MCP Server
 
-**Unofficial MCP Server**
+**Unofficial MCP Server for BugBug**
 
 [![Tests](https://github.com/simplypixi/bugbug-mcp-server/actions/workflows/test.yml/badge.svg)](https://github.com/simplypixi/bugbug-mcp-server/actions/workflows/test.yml)
 
@@ -33,35 +33,6 @@ A Model Context Protocol (MCP) server implementation in TypeScript that provides
 ```bash
 npm install
 ```
-
-### Environment Configuration
-
-The server supports environment-specific configuration files:
-
-1. **Copy the example configuration:**
-
-   ```bash
-   cp .env.example .env.development
-   cp .env.example .env.production
-   ```
-
-2. **Configure your environment files:**
-
-   - `.env.development` - For development environment
-   - `.env.production` - For production environment
-   - `.env.example` - Template file (do not modify)
-
-3. **Set your environment:**
-
-   ```bash
-   # Development (default)
-   export NODE_ENV=development
-
-   # Production
-   export NODE_ENV=production
-   ```
-
-The server automatically loads the appropriate configuration file based on `NODE_ENV`.
 
 ### Adding to AI Assistants
 
@@ -133,49 +104,3 @@ Add to your MCP settings:
 | `explain_error`             | Get error details and documentation                | `runId`, `runType`                                                   |
 | `show_run_from_last_24`     | Show recent runs from last 24 hours                | `runType?`, `pageSize?`                                              |
 | `run_test_by_name_or_id`    | Run test by name or UUID with smart matching       | `testNameOrId`, `profileName?`, `variables?`, `triggeredBy?`         |
-
-## GitHub Workflows
-
-The project includes three automated GitHub workflows:
-
-### 🔍 PR Check (`pr-check.yml`)
-
-**Trigger:** Automatically runs on pull requests to `main`, `master`, or `develop` branches
-
-**Actions:**
-
-- Runs on Node.js 18 and 20
-- Type checking with TypeScript
-- Code linting with ESLint
-- Unit tests with Vitest
-- Build verification
-
-### 📦 Publish to NPM (`publish-npm.yml`)
-
-**Trigger:** Manual workflow dispatch
-
-**Features:**
-
-- Version bump selection (patch/minor/major)
-- Dry run option for testing
-- Automated NPM publishing
-- Git tag creation and push
-
-**Required Secrets:**
-
-- `NPM_TOKEN` - NPM authentication token
-
-### 🚀 Release Changes (`release.yml`)
-
-**Trigger:** Manual workflow dispatch
-
-**Actions:**
-
-- Merges `develop` branch to `master`
-- Version bump and tag creation
-- GitHub release creation with notes
-- Automated changelog generation
-
-**Required Permissions:**
-
-- Write access to repository for tag and release creation
