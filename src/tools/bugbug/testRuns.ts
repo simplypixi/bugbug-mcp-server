@@ -63,65 +63,6 @@ export function registerBugBugTestRunTools(server: McpServer, bugbugClient: BugB
   );
 
   server.tool(
-    'create_test_run',
-    'Execute a BugBug test',
-    {
-      
-      testId: z.string().describe('Test UUID to execute'),
-      profileName: z.string().optional().describe('Profile name to use for execution'),
-      variables: z.array(z.object({
-        key: z.string(),
-        value: z.string().optional(),
-      })).optional().describe('Override variables for the test run'),
-      triggeredBy: z.enum(['user', 'api', 'scheduler', 'github', 'cli']).optional().default('api').describe('Who triggered the run'),
-    },
-    async ({ testId, profileName, variables, triggeredBy }) => {
-      try {
-
-        const data = {
-          testId,
-          profileName,
-          variables,
-          triggeredBy: triggeredBy || 'api',
-        };
-        
-        const response = await bugbugClient.createTestRun(data);
-        
-        if (response.status !== 200) {
-          return {
-            content: [
-              {
-                type: 'text',
-                text: `Error: ${response.status} ${response.statusText}`,
-              },
-            ],
-          };
-        }
-
-        const run = response.data;
-        
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `**Test Run Started:**\n\n- **Run ID:** ${run.id}\n- **Status:** ${run.status}\n- **Modified:** ${run.modified}\n- **Web App URL:** ${run.webappUrl}`,
-            },
-          ],
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error creating test run: ${error instanceof Error ? error.message : 'Unknown error'}`,
-            },
-          ],
-        };
-      }
-    }
-  );
-
-  server.tool(
     'get_test_run',
     'Get detailed results of a BugBug test run',
     {

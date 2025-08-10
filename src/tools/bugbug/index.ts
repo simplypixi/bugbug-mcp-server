@@ -6,6 +6,7 @@ import { registerBugBugSuiteTools } from './suites.js';
 import { registerBugBugSuiteRunTools } from './suiteRuns.js';
 import { registerBugBugTestTools } from './tests.js';
 import { registerBugBugTestRunTools } from './testRuns.js';
+import { registerBugBugAdvancedTools } from './advanced.js';
 
 export function registerBugBugTools(server: McpServer, bugbugClient: BugBugApiClient): void {
   registerBugBugConfigTools(server, bugbugClient);
@@ -14,4 +15,5 @@ export function registerBugBugTools(server: McpServer, bugbugClient: BugBugApiCl
   registerBugBugSuiteRunTools(server, bugbugClient);
   registerBugBugTestTools(server, bugbugClient);
   registerBugBugTestRunTools(server, bugbugClient);
+  registerBugBugAdvancedTools(server, bugbugClient);
 }
