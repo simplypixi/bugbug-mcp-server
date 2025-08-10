@@ -53,21 +53,6 @@ Add to your MCP settings:
 }
 ```
 
-### Environment Variables
-
-| Variable     | Required    | Description                                                    |
-| ------------ | ----------- | -------------------------------------------------------------- |
-| `NODE_ENV`   | ❌ Optional | Environment (development/production) - defaults to development |
-| `API_KEY`    | ✅ Yes      | Your BugBug.io API token for authentication                    |
-| `SENTRY_DSN` | ❌ Optional | Sentry DSN for error tracking and monitoring                   |
-| `DEBUG`      | ❌ Optional | Enable debug logging (true/false)                              |
-| `LOG_LEVEL`  | ❌ Optional | Logging level (debug/info/warn/error)                          |
-
-**Environment-specific behavior:**
-
-- **Development**: Full error logging, 100% Sentry tracing, console error output
-- **Production**: Filtered logging, 10% Sentry tracing, optimized performance
-
 ## Available Tools
 
 | Tool Name                   | Description                                        | Parameters                                                           |
