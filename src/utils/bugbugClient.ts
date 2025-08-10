@@ -9,9 +9,7 @@ import type {
   BugBugScreenshotResponse,
   PaginatedResponse,
   CreateTestRunRequest,
-  CreateSuiteRunRequest,
-  UpdateTestRequest,
-  PartialUpdateTestRequest
+  CreateSuiteRunRequest
 } from '../types/bugbug.types.js';
 
 interface BugBugConfig {
@@ -204,14 +202,6 @@ export class BugBugApiClient {
 
   async getTest(id: string): Promise<ApiResponse<BugBugTest>> {
     return this.makeRequest(`/tests/${id}/`);
-  }
-
-  async updateTest(id: string, data: UpdateTestRequest): Promise<ApiResponse<BugBugTest>> {
-    return this.makeRequest(`/tests/${id}/`, 'PUT', data);
-  }
-
-  async partialUpdateTest(id: string, data: PartialUpdateTestRequest): Promise<ApiResponse<BugBugTest>> {
-    return this.makeRequest(`/tests/${id}/`, 'PATCH', data);
   }
 
   // Test run endpoints

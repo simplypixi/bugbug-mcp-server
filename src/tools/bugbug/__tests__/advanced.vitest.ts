@@ -35,8 +35,8 @@ describe('BugBug Advanced Tools', () => {
   });
 
   it('should register all advanced tools with correct parameters', () => {
-    // Assert that all 5 tools are registered
-    expect(mockServer.tool).toHaveBeenCalledTimes(5);
+    // Assert that all 4 tools are registered
+    expect(mockServer.tool).toHaveBeenCalledTimes(4);
     
     expect(mockServer.tool).toHaveBeenCalledWith(
       'wait_for_test_run',
@@ -48,13 +48,6 @@ describe('BugBug Advanced Tools', () => {
     expect(mockServer.tool).toHaveBeenCalledWith(
       'wait_for_suite_run',
       'Waits until suite run finished, returns full suite run data as result',
-      expect.any(Object),
-      expect.any(Function)
-    );
-    
-    expect(mockServer.tool).toHaveBeenCalledWith(
-      'explain_error',
-      'Gets test run or suite run error code and checks in docs.bugbug.io details about the issue',
       expect.any(Object),
       expect.any(Function)
     );

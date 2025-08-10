@@ -177,14 +177,4 @@ export interface CreateSuiteRunRequest {
   variables?: BugBugVariable[];
 }
 
-export interface UpdateTestRequest {
-  name: string;
-  isActive: boolean;
-  description?: string;
-}
 
-export interface PartialUpdateTestRequest {
-  name?: string;
-  isActive?: boolean;
-  description?: string;
-}
