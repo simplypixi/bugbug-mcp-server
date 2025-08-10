@@ -19,6 +19,7 @@ on:
 
 jobs:
   release:
+    name: Release Changes
     runs-on: ubuntu-latest
 
     steps:

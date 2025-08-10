@@ -6,6 +6,7 @@ on:
 
 jobs:
   pr-check:
+    name: Pull Request Check
     runs-on: ubuntu-latest
 
     steps:
