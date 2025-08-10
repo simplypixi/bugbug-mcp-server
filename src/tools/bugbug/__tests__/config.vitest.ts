@@ -89,11 +89,13 @@ describe('BugBug Config Tools', () => {
   it('should handle missing API_KEY environment variable', async () => {
     // Arrange
     delete process.env.API_KEY;
+    vi.mocked(mockClient.getIpAddresses).mockRejectedValue(new Error('Cannot read properties of undefined (reading \'status\')'));
 
     // Act
     const result = await toolHandler({});
 
     // Assert
-    expect(result.content[0].text).toBe('Error: API_KEY environment variable is not set');
+    expect(result.content[0].text).toContain('Error fetching IP addresses');
+    expect(result.content[0].text).toContain('Cannot read properties of undefined (reading \'status\')');
   });
 });

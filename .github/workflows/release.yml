@@ -1,0 +1,110 @@
+name: Release Changes
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: "Version bump type"
+        required: true
+        default: "patch"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      release_notes:
+        description: "Release notes (optional)"
+        required: false
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".node-version"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Merge develop to master
+        run: |
+          git checkout master
+          git pull origin master
+          git merge origin/develop --no-ff -m "Release: merge develop to master"
+
+      - name: Version bump and create tag
+        id: version
+        run: |
+          npm version ${{ inputs.version_type }}
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Generate Changelog
+        id: changelog
+        uses: TriPSs/conventional-changelog-action@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          output-file: "CHANGELOG.md"
+          skip-version-file: true
+          skip-commit: true
+          git-message: "chore(release): update changelog for v{version}"
+
+      - name: Commit changelog
+        run: |
+          git add CHANGELOG.md
+          git commit -m "chore(release): update changelog for v${{ steps.version.outputs.version }}" || echo "No changelog changes to commit"
+
+      - name: Push changes and tags
+        run: |
+          git push origin master
+          git push --tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
+          body: |
+            ${{ inputs.release_notes }}
+
+            ## Changelog
+            ${{ steps.changelog.outputs.clean_changelog }}
+          draft: false
+          prerelease: false
+
+      - name: Merge master back to develop
+        run: |
+          git checkout develop
+          git pull origin develop
+          git merge master --no-ff -m "Back merge master to develop"
+          git push origin develop
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            **Version:** ${{ steps.version.outputs.version }}
+            **Type:** ${{ inputs.version_type }}
+          draft: false
+          prerelease: false

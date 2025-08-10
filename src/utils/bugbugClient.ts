@@ -1,3 +1,5 @@
+import { captureException, addBreadcrumb } from './sentry.js';
+
 interface BugBugConfig {
   apiToken: string;
   baseUrl?: string;
@@ -20,12 +22,26 @@ export class BugBugApiClient {
 
   async verifyConnection(): Promise<void> {
     try {
+      addBreadcrumb('Verifying BugBug API connection', 'api');
       const response = await this.getIpAddresses();
       if (response.status !== 200) {
-        throw new Error(`API verification failed: ${response.status} ${response.statusText}`);
+        const error = new Error(`API verification failed: ${response.status} ${response.statusText}`);
+        captureException(error, { 
+          component: 'bugbug-client',
+          operation: 'verifyConnection',
+          status: response.status 
+        });
+        throw error;
       }
+      addBreadcrumb('BugBug API connection verified successfully', 'api');
     } catch (error) {
-      throw new Error(`Failed to verify BugBug API connection: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const apiError = new Error(`Failed to verify BugBug API connection: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      captureException(apiError, { 
+        component: 'bugbug-client',
+        operation: 'verifyConnection',
+        originalError: error instanceof Error ? error.message : String(error)
+      });
+      throw apiError;
     }
   }
 
@@ -35,6 +51,12 @@ export class BugBugApiClient {
     body?: any
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
+    
+    addBreadcrumb(`Making ${method} request to ${endpoint}`, 'api', { 
+      endpoint, 
+      method,
+      hasBody: !!body 
+    });
     
     const headers: Record<string, string> = {
       'Authorization': `Token ${this.apiToken}`,
@@ -62,13 +84,35 @@ export class BugBugApiClient {
         data = await response.text() as any;
       }
 
+      // Log non-2xx responses as potential issues
+      if (response.status >= 400) {
+        const error = new Error(`API request failed: ${response.status} ${response.statusText}`);
+        captureException(error, {
+          component: 'bugbug-client',
+          operation: 'makeRequest',
+          endpoint,
+          method,
+          status: response.status,
+          statusText: response.statusText,
+          responseData: data
+        });
+      }
+
       return {
         data,
         status: response.status,
         statusText: response.statusText,
       };
     } catch (error) {
-      throw new Error(`API request failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const apiError = new Error(`API request failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      captureException(apiError, {
+        component: 'bugbug-client',
+        operation: 'makeRequest',
+        endpoint,
+        method,
+        originalError: error instanceof Error ? error.message : String(error)
+      });
+      throw apiError;
     }
   }
 

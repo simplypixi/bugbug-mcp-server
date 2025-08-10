@@ -1,12 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerBugBugTestRunTools } from '../testRuns.js';
-import type { BugBugApiClient } from '../../../utils/bugbugClient.js';
 
 describe('BugBug Test Run Tools', () => {
   let mockServer: McpServer;
   let mockClient: any;
-  let createTestRunHandler: any;
   let getTestRunHandler: any;
   let getTestRunStatusHandler: any;
 
@@ -26,7 +24,6 @@ describe('BugBug Test Run Tools', () => {
     // Arrange - Create mock server
     mockServer = {
       tool: vi.fn((name, description, schema, handler) => {
-        if (name === 'create_test_run') createTestRunHandler = handler;
         if (name === 'get_test_run') getTestRunHandler = handler;
         if (name === 'get_test_run_status') getTestRunStatusHandler = handler;
       }),
@@ -37,46 +34,7 @@ describe('BugBug Test Run Tools', () => {
 
   it('should register all test run tools', () => {
     // Assert
-    expect(mockServer.tool).toHaveBeenCalledTimes(6);
-    expect(mockServer.tool).toHaveBeenCalledWith(
-      'create_test_run',
-      'Execute a BugBug test',
-      expect.any(Object),
-      expect.any(Function)
-    );
-  });
-
-  it('should successfully create a test run', async () => {
-    // Arrange
-    process.env.API_KEY = 'test-token';
-    const mockResponse = {
-      status: 200,
-      data: {
-        id: 'test-run-123',
-        status: 'queued',
-        modified: '2024-01-01T10:00:00Z',
-        webappUrl: 'https://app.bugbug.io/run/test-run-123',
-      },
-    };
-    mockClient.createTestRun.mockResolvedValue(mockResponse);
-
-    // Act
-    process.env.API_KEY = 'test-token';
-    const result = await createTestRunHandler({
-      testId: 'test-123',
-      profileName: 'default',
-    });
-
-    // Assert
-    expect(mockClient.createTestRun).toHaveBeenCalledWith({
-      testId: 'test-123',
-      profileName: 'default',
-      variables: undefined,
-      triggeredBy: 'api',
-    });
-    expect(result.content[0].text).toContain('Test Run Started');
-    expect(result.content[0].text).toContain('test-run-123');
-    expect(result.content[0].text).toContain('queued');
+    expect(mockServer.tool).toHaveBeenCalledTimes(5);
   });
 
   it('should successfully get test run details', async () => {
@@ -142,16 +100,16 @@ describe('BugBug Test Run Tools', () => {
 
   it('should handle API errors gracefully', async () => {
     // Arrange
-    mockClient.createTestRun.mockResolvedValue({
+    mockClient.getTestRun.mockResolvedValue({
       status: 404,
       statusText: 'Not Found',
     });
 
     // Act
     process.env.API_KEY = 'test-token';
-    const result = await createTestRunHandler({
+    const result = await getTestRunHandler({
       
-      testId: 'invalid-test-id',
+      runId: 'invalid-test-id',
     });
 
     // Assert
