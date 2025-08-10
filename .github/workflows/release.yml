@@ -65,8 +65,12 @@ jobs:
 
       - name: Commit changelog
         run: |
-          git add CHANGELOG.md
-          git commit -m "chore(release): update changelog for v${{ steps.version.outputs.version }}" || echo "No changelog changes to commit"
+          if [ -f "CHANGELOG.md" ]; then
+            git add CHANGELOG.md
+            git commit -m "chore(release): update changelog for v${{ steps.version.outputs.version }}" || echo "No changelog changes to commit"
+          else
+            echo "No CHANGELOG.md file generated, skipping changelog commit"
+          fi
 
       - name: Push changes and tags
         run: |
