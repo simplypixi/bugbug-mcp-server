@@ -16,11 +16,7 @@
     "inspect:local": "npm run build && npx -y @modelcontextprotocol/inspector node dist/index.js",
     "inspect:dev": "npm run build && NODE_ENV=development npx -y @modelcontextprotocol/inspector node dist/index.js",
     "inspect:prod": "npm run build && NODE_ENV=production npx -y @modelcontextprotocol/inspector node dist/index.js",
-    "prepublishOnly": "npm run lint && npm run test && npm run build",
-    "publish:patch": "npm version patch && npm publish",
-    "publish:minor": "npm version minor && npm publish",
-    "publish:major": "npm version major && npm publish",
-    "publish:dry-run": "npm run prepublishOnly && npm publish --dry-run"
+    "prepublishOnly": "npm run lint && npm run test && npm run build"
   },
   "keywords": [
     "mcp",

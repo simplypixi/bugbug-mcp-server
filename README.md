@@ -89,3 +89,36 @@ Add to your MCP settings:
 | `explain_error`             | Get error details and documentation                | `runId`, `runType`                                                   |
 | `show_run_from_last_24`     | Show recent runs from last 24 hours                | `runType?`, `pageSize?`                                              |
 | `run_test_by_name_or_id`    | Run test by name or UUID with smart matching       | `testNameOrId`, `profileName?`, `variables?`, `triggeredBy?`         |
+
+## Development & Release
+
+This project uses automated versioning and publishing with [Release Please](https://github.com/googleapis/release-please):
+
+### Automated Workflow
+
+1. **Development**: Create feature branches from `master` and open PRs
+2. **Release PR**: Release Please automatically creates/updates a release PR with:
+   - Version bump based on [Conventional Commits](https://www.conventionalcommits.org/)
+   - Generated changelog from commit messages
+3. **Publishing**: When the release PR is merged:
+   - GitHub release is created automatically
+   - Package is published to NPM
+   - Release notes include NPM package link
+
+### Commit Message Format
+
+Use [Conventional Commits](https://www.conventionalcommits.org/) for automatic versioning:
+
+- `feat:` - New features (minor version bump)
+- `fix:` - Bug fixes (patch version bump)  
+- `feat!:` or `fix!:` - Breaking changes (major version bump)
+- `chore:`, `docs:`, `style:`, `refactor:`, `test:`, `ci:` - No version bump
+
+### Manual Testing
+
+To test publishing without actually releasing:
+
+```bash
+# Trigger workflow with dry run
+gh workflow run "Release and Publish" --field dry_run=true
+```

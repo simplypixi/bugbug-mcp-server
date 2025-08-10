@@ -3,15 +3,6 @@ name: Publish to NPM
 on:
   workflow_dispatch:
     inputs:
-      version_type:
-        description: "Version bump type"
-        required: true
-        default: "patch"
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
       dry_run:
         description: "Dry run (do not actually publish)"
         required: false
@@ -19,9 +10,27 @@ on:
         type: boolean
 
 jobs:
+  release-please:
+    name: Create Release PR or Release
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - name: Create Release PR or Release
+        id: release
+        uses: google-github-actions/release-please-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: .release-please-config.json
+          manifest-file: .release-please-manifest.json
+
   publish:
     name: Publish to NPM
     runs-on: ubuntu-latest
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created || inputs.dry_run }}
 
     steps:
       - name: Checkout code
@@ -39,28 +48,31 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run tests
+        run: npm test
+
       - name: Build project
         run: npm run build
 
-      - name: Configure Git
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-
       - name: Dry run publish
         if: ${{ inputs.dry_run }}
-        run: npm run publish:dry-run
+        run: npm publish --dry-run
 
-      - name: Version bump and publish
-        if: ${{ !inputs.dry_run }}
-        run: |
-          npm version ${{ inputs.version_type }}
-          npm publish
+      - name: Publish to NPM
+        if: ${{ !inputs.dry_run && needs.release-please.outputs.release_created }}
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Push version tag
-        if: ${{ !inputs.dry_run }}
-        run: git push --follow-tags
+      - name: Update GitHub Release with NPM info
+        if: ${{ !inputs.dry_run && needs.release-please.outputs.release_created }}
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.release-please.outputs.tag_name }}
+          append_body: true
+          body: |
+
+            ---
+            📦 **NPM Package**: [bugbug-mcp-server@${{ needs.release-please.outputs.version }}](https://www.npmjs.com/package/bugbug-mcp-server/v/${{ needs.release-please.outputs.version }})
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
