@@ -1,5 +1,12 @@
 
 
+## [0.0.6](https://github.com/simplypixi/bugbug-mcp-server/compare/v0.0.5...v0.0.6) (2025-08-10)
+
+
+### Bug Fixes
+
+* Setup tools order ([a63553e](https://github.com/simplypixi/bugbug-mcp-server/commit/a63553e65101c5dd6a8d468e971a4705821a7909))
+
 ## [0.0.5](https://github.com/simplypixi/bugbug-mcp-server/compare/v0.0.4...v0.0.5) (2025-08-10)
 
 
