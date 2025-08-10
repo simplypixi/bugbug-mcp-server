@@ -1,5 +1,12 @@
 
 
+## [0.0.8](https://github.com/simplypixi/bugbug-mcp-server/compare/v0.0.7...v0.0.8) (2025-08-10)
+
+
+### Bug Fixes
+
+* Remove some redundant tools ([8278d99](https://github.com/simplypixi/bugbug-mcp-server/commit/8278d99e94189f46eabb7f3ecd2d244baf86119c))
+
 ## [0.0.7](https://github.com/simplypixi/bugbug-mcp-server/compare/v0.0.6...v0.0.7) (2025-08-10)
 
 ## [0.0.6](https://github.com/simplypixi/bugbug-mcp-server/compare/v0.0.5...v0.0.6) (2025-08-10)
