@@ -45,12 +45,6 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
-      - name: Merge develop to master
-        run: |
-          git checkout master
-          git pull origin master
-          git merge origin/develop --no-ff -m "Release: merge develop to master"
-
       - name: Version bump and create tag
         id: version
         run: |
@@ -92,19 +86,5 @@ jobs:
 
             ## Changelog
             ${{ steps.changelog.outputs.clean_changelog }}
-          draft: false
-          prerelease: false
-
-      - name: Merge master back to develop
-        run: |
-          git checkout develop
-          git pull origin develop
-          git merge master --no-ff -m "Back merge master to develop"
-          git push origin develop
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-            **Version:** ${{ steps.version.outputs.version }}
-            **Type:** ${{ inputs.version_type }}
           draft: false
           prerelease: false

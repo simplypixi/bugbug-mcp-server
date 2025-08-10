@@ -1,10 +1,8 @@
 name: PR Check
 
 on:
-  pull_request:
-    branches: [main, master, develop]
   pull_request_target:
-    branches: [main, master, develop]
+    branches: [master]
 
 jobs:
   pr-check:
