@@ -1,24 +1,25 @@
 import { z } from 'zod';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { bugbugClient } from '../services/bugbugClient.js';
+import { Tool } from '../types/tools.js';
 import {
   BugBugStepDetail,
   BugBugTestRun
-} from '../../types/bugbug.types.js';
-import type { BugBugApiClient } from '../../utils/bugbugClient.js';
+} from '../types/bugbug.types.js';
+import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { createTestRunSummary } from '../utils/responses.js';
 
-export function registerBugBugTestRunTools(server: McpServer, bugbugClient: BugBugApiClient): void {
-  server.tool(
-    'get_test_runs',
-    'Get list of historical BugBug test runs',
-    {
-      
-      page: z.number().optional().describe('Page number for pagination'),
-      pageSize: z.number().optional().describe('Number of results per page'),
-      ordering: z.enum(['-started', 'started']).optional().describe('Sort order by start time'),
-      startedAfter: z.string().optional().describe('Filter runs started after this datetime (ISO format)'),
-      startedBefore: z.string().optional().describe('Filter runs started before this datetime (ISO format)'),
-    },
-    async ({ page, pageSize, ordering, startedAfter, startedBefore }) => {
+export const getTestRunsTool: Tool = {
+  name: 'get_test_runs',
+  title: 'Get list of historical BugBug test runs',
+  description: 'Get list of historical BugBug test runs',
+  inputSchema: z.object({
+    page: z.number().optional().describe('Page number for pagination'),
+    pageSize: z.number().optional().describe('Number of results per page'),
+    ordering: z.enum(['-started', 'started']).optional().describe('Sort order by start time'),
+    startedAfter: z.string().optional().describe('Filter runs started after this datetime (ISO format)'),
+    startedBefore: z.string().optional().describe('Filter runs started before this datetime (ISO format)'),
+  }).shape,
+  handler: async ({ page, pageSize, ordering, startedAfter, startedBefore }) => {
       try {
 
         const response = await bugbugClient.getTestRuns(page, pageSize, ordering, startedAfter, startedBefore);
@@ -64,16 +65,16 @@ export function registerBugBugTestRunTools(server: McpServer, bugbugClient: BugB
         };
       }
     }
-  );
+};
 
-  server.tool(
-    'get_test_run',
-    'Get detailed results of a BugBug test run',
-    {
-      
-      runId: z.string().describe('Test run UUID'),
-    },
-    async ({ runId }) => {
+export const getTestRunTool: Tool = {
+  name: 'get_test_run',
+  title: 'Get detailed results of a BugBug test run',
+  description: 'Get detailed results of a BugBug test run',
+  inputSchema: z.object({
+    runId: z.string().describe('Test run UUID'),
+  }).shape,
+  handler: async ({ runId }) => {
       try {
 
         const response = await bugbugClient.getTestRun(runId);
@@ -89,24 +90,21 @@ export function registerBugBugTestRunTools(server: McpServer, bugbugClient: BugB
           };
         }
 
-        const run = response.data;
-        
-        let stepDetails = '';
-        if (run.details && run.details.length > 0) {
-          stepDetails = run.details.map((step: BugBugStepDetail) => 
-            `  - **Step ${step.stepId}** (ID: ${step.id}) - Status: ${step.status}`
-          ).join('\n');
-        } else {
-          stepDetails = '  No step details available';
-        }
-        
+        const runDetails = await bugbugClient.getTestRun(runId);
+        const summary: CallToolResult['content'] = [
+          {
+            type: 'text',
+            text: createTestRunSummary(runDetails.data),
+          },
+        ];
+        const screenshotMessages: CallToolResult['content'] = runDetails.data.screenshots?.map(screenshot => ({
+          type: 'image',
+          data: screenshot,
+          mimeType: 'image/png',
+        })) || [];
+
         return {
-          content: [
-            {
-              type: 'text',
-              text: `**Test Run Details:**\n\n- **Name:** ${run.name}\n- **ID:** ${run.id}\n- **Status:** ${run.status}\n- **Duration:** ${run.duration || 'N/A'}\n- **Queued:** ${run.queued || 'N/A'}\n- **Error Code:** ${run.errorCode || 'None'}\n- **Sequence:** ${run.sequence || 'N/A'}\n- **Web App URL:** ${run.webappUrl}\n\n**Step Details:**\n${stepDetails}`,
-            },
-          ],
+          content: [...summary, ...screenshotMessages],
         };
       } catch (error) {
         return {
@@ -118,17 +116,17 @@ export function registerBugBugTestRunTools(server: McpServer, bugbugClient: BugB
           ],
         };
       }
-    }
-  );
-
-  server.tool(
-    'get_test_run_status',
-    'Get current status of a BugBug test run',
-    {
-      
-      runId: z.string().describe('Test run UUID'),
     },
-    async ({ runId }) => {
+};
+
+export const getTestRunStatusTool: Tool = {
+  name: 'get_test_run_status',
+  title: 'Get current status of a BugBug test run',
+  description: 'Get current status of a BugBug test run',
+  inputSchema: z.object({
+    runId: z.string().describe('Test run UUID'),
+  }).shape,
+  handler: async ({ runId }) => {
       try {
 
         const statusResponse = await bugbugClient.getTestRunStatus(runId);
@@ -165,16 +163,16 @@ export function registerBugBugTestRunTools(server: McpServer, bugbugClient: BugB
         };
       }
     }
-  );
+};
 
-  server.tool(
-    'get_test_run_screenshots',
-    'Get screenshots from a BugBug test run',
-    {
-      
-      runId: z.string().describe('Test run UUID'),
-    },
-    async ({ runId }) => {
+export const getTestRunScreenshotsTool: Tool = {
+  name: 'get_test_run_screenshots',
+  title: 'Get screenshots from a BugBug test run',
+  description: 'Get screenshots from a BugBug test run',
+  inputSchema: z.object({
+    runId: z.string().describe('Test run UUID'),
+  }).shape,
+  handler: async ({ runId }) => {
       try {
 
         const response = await bugbugClient.getTestRunScreenshots(runId);
@@ -220,16 +218,16 @@ export function registerBugBugTestRunTools(server: McpServer, bugbugClient: BugB
         };
       }
     }
-  );
+};
 
-  server.tool(
-    'stop_test_run',
-    'Stop a running BugBug test run',
-    {
-      
-      runId: z.string().describe('Test run UUID to stop'),
-    },
-    async ({ runId }) => {
+export const stopTestRunTool: Tool = {
+  name: 'stop_test_run',
+  title: 'Stop a running BugBug test run',
+  description: 'Stop a running BugBug test run',
+  inputSchema: z.object({
+    runId: z.string().describe('Test run UUID to stop'),
+  }).shape,
+  handler: async ({ runId }) => {
       try {
 
         const response = await bugbugClient.stopTestRun(runId);
@@ -266,5 +264,5 @@ export function registerBugBugTestRunTools(server: McpServer, bugbugClient: BugB
         };
       }
     }
-  );
-}
+
+};

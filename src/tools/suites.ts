@@ -1,19 +1,20 @@
 import { z } from 'zod';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { BugBugApiClient } from '../../utils/bugbugClient.js';
-import type { BugBugSuite } from '../../types/bugbug.types.js';
+import { bugbugClient } from '../services/bugbugClient.js';
+import { Tool } from '../types/tools.js';
+import type { BugBugSuite } from '../types/bugbug.types.js';
 
-export function registerBugBugSuiteTools(server: McpServer, bugbugClient: BugBugApiClient): void {
-  server.tool(
-    'get_suites',
-    'Get list of BugBug test suites',
-    {
-      page: z.number().optional().describe('Page number for pagination'),
-      pageSize: z.number().optional().describe('Number of results per page'),
-      query: z.string().optional().describe('Search query for suite names'),
-      ordering: z.enum(['name', '-name', 'created', '-created']).optional().describe('Sort order'),
-    },
-    async ({ page, pageSize, query, ordering }) => {
+
+export const getSuitesTool: Tool = {
+  name: 'get_suites',
+  title: 'Get list of BugBug test suites',
+  description: 'Get list of BugBug test suites',
+  inputSchema: z.object({
+    page: z.number().optional().describe('Page number for pagination'),
+    pageSize: z.number().optional().describe('Number of results per page'),
+    query: z.string().optional().describe('Search query for suite names'),
+    ordering: z.enum(['name', '-name', 'created', '-created']).optional().describe('Sort order'),
+  }).shape,
+  handler: async ({ page, pageSize, query, ordering }) => {
       try {
         const response = await bugbugClient.getSuites(page, pageSize, query, ordering);
         
@@ -58,15 +59,16 @@ export function registerBugBugSuiteTools(server: McpServer, bugbugClient: BugBug
         };
       }
     }
-  );
+};
 
-  server.tool(
-    'get_suite',
-    'Get details of a specific BugBug test suite',
-    {
-      suiteId: z.string().describe('Suite UUID'),
-    },
-    async ({ suiteId }) => {
+export const getSuiteTool: Tool = {
+  name: 'get_suite',
+  title: 'Get details of a specific BugBug test suite',
+  description: 'Get details of a specific BugBug test suite',
+  inputSchema: z.object({
+    suiteId: z.string().describe('Suite UUID'),
+  }).shape,
+  handler: async ({ suiteId }) => {
       try {
         const response = await bugbugClient.getSuite(suiteId);
         
@@ -102,5 +104,4 @@ export function registerBugBugSuiteTools(server: McpServer, bugbugClient: BugBug
         };
       }
     }
-  );
-}
+};

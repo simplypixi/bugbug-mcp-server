@@ -1,4 +1,4 @@
-import { captureException, addBreadcrumb } from './sentry.js';
+import { captureException, addBreadcrumb } from '../utils/sentry.js';
 import type {
   BugBugTest,
   BugBugSuite,
@@ -243,3 +243,5 @@ export class BugBugApiClient {
     return this.makeRequest(`/testruns/${id}/stop/`, 'POST');
   }
 }
+
+export const bugbugClient = new BugBugApiClient({ apiToken: process.env.API_KEY! });

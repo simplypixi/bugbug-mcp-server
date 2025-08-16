@@ -5,7 +5,8 @@
 // BASE TYPES AND ENUMS
 // ============================================================================
 
-export type BugBugRunStatus = 'running' | 'completed' | 'failed' | 'stopped';
+export type BugBugRunStatus = 'running' | 'passed' | 'failed' | 'stopped' | 'queued' | 'initializing';
+export const isFinishedRunStatus = (status: BugBugRunStatus) => status === 'passed' || status === 'failed' || status === 'stopped';
 export type BugBugTriggerSource = 'user' | 'api' | 'scheduler' | 'github' | 'cli';
 
 export interface BugBugScreenshot {

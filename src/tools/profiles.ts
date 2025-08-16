@@ -1,17 +1,18 @@
 import { z } from 'zod';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { BugBugApiClient } from '../../utils/bugbugClient.js';
-import type { BugBugProfile } from '../../types/bugbug.types.js';
+import { bugbugClient } from '../services/bugbugClient.js';
+import { Tool } from '../types/tools.js';
+import type { BugBugProfile } from '../types/bugbug.types.js';
 
-export function registerBugBugProfileTools(server: McpServer, bugbugClient: BugBugApiClient): void {
-  server.tool(
-    'get_profiles',
-    'Get list of BugBug run profiles',
-    {
-      page: z.number().optional().describe('Page number for pagination'),
-      pageSize: z.number().optional().describe('Number of results per page'),
-    },
-    async ({ page, pageSize }) => {
+
+export const getProfilesTool: Tool = {
+  name: 'get_profiles',
+  title: 'Get list of BugBug run profiles',
+  description: 'Get list of BugBug run profiles',
+  inputSchema: z.object({
+    page: z.number().optional().describe('Page number for pagination'),
+    pageSize: z.number().optional().describe('Number of results per page'),
+  }).shape,
+  handler: async ({ page, pageSize }) => {
       try {
         const response = await bugbugClient.getProfiles(page, pageSize);
         
@@ -56,15 +57,16 @@ export function registerBugBugProfileTools(server: McpServer, bugbugClient: BugB
         };
       }
     }
-  );
+};
 
-  server.tool(
-    'get_profile',
-    'Get details of a specific BugBug run profile',
-    {
-      profileId: z.string().describe('Profile UUID'),
-    },
-    async ({ profileId }) => {
+export const getProfileTool: Tool = {
+  name: 'get_profile',
+  title: 'Get details of a specific BugBug run profile',
+  description: 'Get details of a specific BugBug run profile',
+  inputSchema: z.object({
+    profileId: z.string().describe('Profile UUID'),
+  }).shape,
+  handler: async ({ profileId }) => {
       try {
         const response = await bugbugClient.getProfile(profileId);
         
@@ -100,5 +102,4 @@ export function registerBugBugProfileTools(server: McpServer, bugbugClient: BugB
         };
       }
     }
-  );
-}
+};

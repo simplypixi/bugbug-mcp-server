@@ -8,8 +8,9 @@ initializeSentry();
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { BugBugApiClient } from './utils/bugbugClient.js';
+import { BugBugApiClient } from './services/bugbugClient.js';
 import { registerAllTools } from './tools/index.js';
+
 // Start the server
 async function main() {
   try {
@@ -38,7 +39,7 @@ async function main() {
 
     // Register all tools with the client instance
     addBreadcrumb('Registering tools', 'server');
-    registerAllTools(server, bugbugClient);
+    registerAllTools(server);
 
     // Start the server
     addBreadcrumb('Starting server transport', 'server');

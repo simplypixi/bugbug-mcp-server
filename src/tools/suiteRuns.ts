@@ -1,22 +1,20 @@
 import { z } from 'zod';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { bugbugClient } from '../services/bugbugClient.js';
+import { Tool } from '../types/tools.js';
 import {
   BugBugStepDetail,
   BugBugTestDetail,
   BugBugSuiteRun
-} from '../../types/bugbug.types.js';
-import type { BugBugApiClient } from '../../utils/bugbugClient.js';
+} from '../types/bugbug.types.js';
 
-export function registerBugBugSuiteRunTools(server: McpServer, bugbugClient: BugBugApiClient): void {
-
-  server.tool(
-    'get_suite_run',
-    'Get detailed results of a BugBug suite run',
-    {
-      
-      runId: z.string().describe('Suite run UUID'),
-    },
-    async ({ runId }) => {
+export const getSuiteRunTool: Tool = {
+  name: 'get_suite_run',
+  title: 'Get detailed results of a BugBug suite run',
+  description: 'Get detailed results of a BugBug suite run',
+  inputSchema: z.object({
+    runId: z.string().describe('Suite run UUID'),
+  }).shape,
+  handler: async ({ runId }) => {
       try {
 
         const response = await bugbugClient.getSuiteRun(runId);
@@ -62,16 +60,16 @@ export function registerBugBugSuiteRunTools(server: McpServer, bugbugClient: Bug
         };
       }
     }
-  );
+  };
 
-  server.tool(
-    'get_suite_run_status',
-    'Get current status of a BugBug suite run',
-    {
-      
-      runId: z.string().describe('Suite run UUID'),
-    },
-    async ({ runId }) => {
+export const getSuiteRunStatusTool: Tool = {
+  name: 'get_suite_run_status',
+  title: 'Get current status of a BugBug suite run',
+  description: 'Get current status of a BugBug suite run',
+  inputSchema: z.object({
+    runId: z.string().describe('Suite run UUID'),
+  }).shape,
+  handler: async ({ runId }) => {
       try {
 
         const statusResponse = await bugbugClient.getSuiteRunStatus(runId);
@@ -108,16 +106,16 @@ export function registerBugBugSuiteRunTools(server: McpServer, bugbugClient: Bug
         };
       }
     }
-  );
+};
 
-  server.tool(
-    'get_suite_run_screenshots',
-    'Get screenshots from a BugBug suite run',
-    {
-      
-      runId: z.string().describe('Suite run UUID'),
-    },
-    async ({ runId }) => {
+export const getSuiteRunScreenshotsTool: Tool = {
+  name: 'get_suite_run_screenshots',
+  title: 'Get screenshots from a BugBug suite run',
+  description: 'Get screenshots from a BugBug suite run',
+  inputSchema: z.object({
+    runId: z.string().describe('Suite run UUID'),
+  }).shape,
+  handler: async ({ runId }) => {
       try {
 
         const response = await bugbugClient.getSuiteRunScreenshots(runId);
@@ -167,16 +165,16 @@ export function registerBugBugSuiteRunTools(server: McpServer, bugbugClient: Bug
         };
       }
     }
-  );
+};
 
-  server.tool(
-    'stop_suite_run',
-    'Stop a running BugBug suite run',
-    {
-      
-      runId: z.string().describe('Suite run UUID to stop'),
-    },
-    async ({ runId }) => {
+export const stopSuiteRunTool: Tool = {
+  name: 'stop_suite_run',
+  title: 'Stop a running BugBug suite run',
+  description: 'Stop a running BugBug suite run',
+  inputSchema: z.object({
+    runId: z.string().describe('Suite run UUID to stop'),
+  }).shape,
+  handler: async ({ runId }) => {
       try {
 
         const response = await bugbugClient.stopSuiteRun(runId);
@@ -213,5 +211,4 @@ export function registerBugBugSuiteRunTools(server: McpServer, bugbugClient: Bug
         };
       }
     }
-  );
-}
+};

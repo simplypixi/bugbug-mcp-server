@@ -1,19 +1,19 @@
 import { z } from 'zod';
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { BugBugApiClient } from '../../utils/bugbugClient.js';
-import type { BugBugTest } from '../../types/bugbug.types.js';
+import { bugbugClient } from '../services/bugbugClient.js';
+import { Tool } from '../types/tools.js';
+import type { BugBugTest } from '../types/bugbug.types.js';
 
-export function registerBugBugTestTools(server: McpServer, bugbugClient: BugBugApiClient): void {
-  server.tool(
-    'get_tests',
-    'Get list of BugBug tests',
-    {
-      page: z.number().optional().describe('Page number for pagination'),
-      pageSize: z.number().optional().describe('Number of results per page'),
-      query: z.string().optional().describe('Search query for test names'),
-      ordering: z.enum(['name', '-name', 'created', '-created', 'last_result', '-last_result']).optional().describe('Sort order'),
-    },
-    async ({ page, pageSize, query, ordering }) => {
+export const getTestsTool: Tool = {
+  name: 'get_tests',
+  title: 'Get list of BugBug tests',
+  description: 'Get list of BugBug tests',
+  inputSchema: z.object({
+    page: z.number().optional().describe('Page number for pagination'),
+    pageSize: z.number().optional().describe('Number of results per page'),
+    query: z.string().optional().describe('Search query for test names'),
+    ordering: z.enum(['name', '-name', 'created', '-created', 'last_result', '-last_result']).optional().describe('Sort order'),
+  }).shape,
+  handler: async ({ page, pageSize, query, ordering }) => {
       try {
 
         const response = await bugbugClient.getTests(page, pageSize, query, ordering);
@@ -59,21 +59,22 @@ export function registerBugBugTestTools(server: McpServer, bugbugClient: BugBugA
         };
       }
     }
-  );
+};
 
-  server.tool(
-    'get_test',
-    'Get details of a specific BugBug test',
-    {
-      testId: z.string().describe('Test UUID'),
-    },
-    async ({ testId }) => {
+export const getTestTool: Tool = {
+  name: 'get_test',
+  title: 'Get details of a specific BugBug test',
+  description: 'Get details of a specific BugBug test',
+  inputSchema: z.object({
+    testId: z.string().describe('Test UUID'),
+  }).shape,
+  handler: async ({ testId }) => {
       try {
 
         const response = await bugbugClient.getTest(testId);
         
         if (response.status !== 200) {
-          return {
+          return {  
             content: [
               {
                 type: 'text',
@@ -104,7 +105,5 @@ export function registerBugBugTestTools(server: McpServer, bugbugClient: BugBugA
         };
       }
     }
-  );
+};
 
-
-}
