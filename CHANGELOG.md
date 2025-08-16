@@ -1,5 +1,7 @@
 
 
+## [0.1.1](https://github.com/simplypixi/bugbug-mcp-server/compare/v0.1.0...v0.1.1) (2025-08-16)
+
 # [0.1.0](https://github.com/simplypixi/bugbug-mcp-server/compare/v0.0.8...v0.1.0) (2025-08-16)
 
 
