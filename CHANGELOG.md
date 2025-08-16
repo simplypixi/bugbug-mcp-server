@@ -1,5 +1,12 @@
 
 
+# [0.1.0](https://github.com/simplypixi/bugbug-mcp-server/compare/v0.0.8...v0.1.0) (2025-08-16)
+
+
+### Features
+
+* Refactor tools ([a0b9cea](https://github.com/simplypixi/bugbug-mcp-server/commit/a0b9cea144791103274c1e204662ce37889e2e8f))
+
 ## [0.0.8](https://github.com/simplypixi/bugbug-mcp-server/compare/v0.0.7...v0.0.8) (2025-08-10)
 
 
